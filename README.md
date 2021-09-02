@@ -441,5 +441,187 @@
   + Q: says "This will publish to `CodingEventsAPI/bin/Release/netcoreapp3.1/linux-x64/publish/`" - 4.4.2.1
     + BUT, linux-x64/ folder is nowhere to be found
     + oh crap, it's supposed to be on linux, but doesn't say this anywhere
-    + 
+
+------
+
+**Chapter 5 Azure and VM's**
+
++ **Intro to infrastructure and IAAS**
+  + they lease access to infrastructure services hosted in data centers
+    + data centers are large buildings that contain physical infrastructure like computer, networking equipment, storage disks, etc.
+  + The process of subdividing servers, storage and networking is *virtualization*
+    + this is what you rent 
+  + Part of *why* you rent from a CSP is a guarantee of high availability/server uptime.
+    + As well as not having to deal with the hardware
+  + Infrastructure 5.1.2
+    + infrastrucure just used as a reference to hardware + software used to dpeloy code
+    + IaaS = CSP renting access to virtualized service through a digital interface
+      + most CSP's give a web UI and a CLI tool to manage, configure and provision(create) the infrastructure rented
+    + CSP's usually rent out
+      + disk storage
+      + computation
+      + networking
+  + Disk Storage
+    + Scaling = process of increasing/decreasing resources based on demand
+  + Computation
+    + 2 types of scaling for a CSP:
+      1. Vertical
+         - increasing/decreasing power of CPU cores and RAM on single machine
+      2. Horizontal
+         - increasing/decreasing number of VM's with same amount of CPU + RAM
+  + Azure for each subject area within CSP:
+    + Compute: [Azure Virtual Machine](https://azure.microsoft.com/en-us/services/virtual-machines/)
+    + Storage: [Azure SQL Databases](https://azure.microsoft.com/en-us/services/sql-database/) & [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/)
+    + Network: [Azure Virtual Network](https://azure.microsoft.com/en-us/services/virtual-network/)
++ **5.2 intro to azure**
+  + Key vaault = accessible service that stores info such as sensitive or configuration data. Like a database connectio string.
+  + azure AD (azure active directory) = allows to authenticate users. Will use OAuth in this book. But azure does support others types of authentication. Also offers SQL services
+  + Azure resource groups = organizational tools to help manage azure resources. Create resource groups per project
++ **5.3 Intro to VM's**
+  + Vm = computer file (referred to as image) that behaves like actual computer. 
+  + ***<u>MAKE SURE TO STOP VM'S WHEN DONE IN AZURe</u>***
+  + parity = equivalence between a development environment and the production environment.
++ **5.4 Walkhrough**
+  - Steps for deployment with azure:
+    1. Create a resource group
+    2. Spin up a VM with an Ubuntu OS
+    3. Configure our VM to run our application
+    4. Create our source code
+    5. Create the build artifacts (publishing)
+    6. Deploy the build artifacts
+    7. Open the VM security group
+    8. Connect to deployed project	
+  - Q:A Make SURE students enters the username and password for their server correctly when creating it. (5.4.3)
+  - Q:A Password and username are listed in 5.4.3 for this server https://education.launchcode.org/azure/chapters/azure-intro/walkthrough.html
+  - windows users might have to use the publish folder.
+
+------
+
+**Chapter 6 Secretes Management and Backing Services**
+
+- **6.1 Secrets Management**
+  - secret = privileged piece of info that our application needs to operate. LIke a database string
+    - way to protect senstitive data like PII
+      - PII/sensitive data usually secured with a data backing service
+  - Secrets are also kept separate from the source code of the application
+    - examples:
+      - Databases connection strings
+      - API keys
+      - Usernames
+      - Passwords
+      - VM IP addresses
+  - Handling sensitive data
+    - keep it out of version control
+    - app secrets are stored externally and loaded at runtime
+    - infrastructure must grant least-privileged access
+    - PII/proprietary data securely housed and requires authorization
+  - BE CAREFUL of what files we track with Git.
+    - never stage and commit it to a git repo.
+    - this is tracked by gitignore
+      - Q:A Wth? We already went over gitignore files before
+  - External Configuration
+    - best practice for handling secrets is to use `external configuration` files. 
+      - keeps our config files outside of our project file tree
+        - examples of this would be like the `appsettings.json` file.
+    - these files have 2 main advantages:
+      - Secrets are kept separate and safe from both the code and running application
+      - An application can have different configuration for different environments, such as different database connection strings for staging and production
+  - Secrets Management
+    - We will use azure key vault
+    - `dotnet user-secrets` is a module in the dotnet CLI. this is a local secrets manager
+      - it creates a secrets store on our machine. when initialized for a project, our project configuration file (.csproj) will automatically be updated with its ID
+- *Skipped through 6.1 and 6.2 just to get a brief overview, so I didn't include super detailed notes here
+- **6.2 Application Environments**
+  - `Local->Development->Production` is the typical environments during a normal development cycle
+    - Testing and staging are here too but they're outside the scope of this classs
+- **6.3 Backing Services**
+  - any service a MVC app needs is a backing service
+  - Examples:
+    - relational db's (MYSQL)
+    - Non relation Dbs (MongoDB)
+    - Cachine services (Redis, Azure caching, Memcached)
+  - External Backing services
+    - a service that runs externally to the application. i.e. they run on different host machines and commuincate over an external network
+      - like a managed database
+  - Internal Backing Services
+    - services ran on the same machine as running applicaiton that needs it
+      - this is what we have used in class so far. local environments usually do this
+  - App Environment best pracitces
+    - local
+      - use internal backing services
+    - development
+      - *should* use internal backing services. 
+      - supposed to be fully automated and only generate reports. CI system should be handling most of this
+      - but this is also dependent on the nature of the project as well, internal may not *always* be best solution
+    - production
+      - use external backing services. use a CSP
+      - 
+- **6.4 Walkthrough**
+  - fork the repository, clone the repository
+  - this walkthrough is heady. Aggressive. Set in a different format from the other walkthrough
+    - tries to teach half of it while also walking through it.
+  - in 6.4.2 it gets better here, becomes much more straighforward
+  - 6.4.11 throws an error:
+    - ![image-20210827160308245](C:\Users\Blake\AppData\Roaming\Typora\typora-user-images\image-20210827160308245.png)
+
+------
+**Chapter 7 Authentication and Authoriation with Azure**
+- **7.1 Introduction and key concepts**
+  - will learn 2 security protocols
+    1. `OAuth`
+    2.  `OIDC`
+  - `AADB2C` - Azure active directory business to customer
+    - used to securely manage interactions between applications and user accounts
+  - `Authentication` - process used by an entity to prove their identity
+    - think logging into your user account.
+  - `Authorization` - permissions needed to access a protected resource
+    - only entities authorized to access a resource are allowed to do so
+    - ` access control systems` define rules (aka `policies`) for managing authorization
+  - Server roles
+    - resources are managed by a `resource server`. Like an email provider
+    - will use AADB2C as an `authorization server`to protect our api from unauthorized requests.
+  - Delegation
+    - `delegation` - authorization for an entity to act on behalf of another
+  - OAuth and OIDC
+    - a user delegates authorization to a client through the use of a digital token
+    - this client uses the access token to prove that they are authorized to access a resource according to permission granted
+  - OIDC
+    - is built over OAuth
+    - is used to delegate authentication through use of an `identity token`. 
+      - `identity tokens` prove the identity of the user. Is what enables SSO's (`single sign on's`) on the web
+        - i.e what allows you to log in to many different client services using a single identity token
+
+- **7.2 Walkthrough: OAuth and OIDC**
+  - both OAuth and OIDC specs (Specificatinos) are designed for a user to securely coordinate an exchange of info between two unrelated services
+    - `client service` - requires a user to authorize access to their identy or data
+    - `provider service` - provides said identity or data access of a user who authorized a client services.
+  - Again
+    - OAuth - used for authorizing access of users data on provider service to client service
+    - OIDC - id provider service used to rovide ideneity of a user in order to authenticate with a client service
+  - Q/A: uh.. are we supposed to be doing this in ubuntu or powershell? because it's not made very clear here. Also. In the readme for the Visual OAuth repo, it gives this command: `npm run setup:windows`. But it never told us to install npm from what I recall
+    - also did not tell us to generate a new client secret either
+  - Have to **absolutely** make sure to use the windows instructions when doing this walkthrough
+  - OAuth grant flow:
+    - This grant flow results in an access token. 
+    - This access token authorizes the client API. 
+    - This allows client API to access a user's github data
+  - OAuth `implicit grant flow`
+    - Q/A: Why the heck was this brought up in a walkthrough?
+    - Q/A: you're *supposed* to run through the application that loads? That was nowhere in the instructions. Had to infer that from what the instructions we're "reviewing" what we did.
+    - anyways, onto the grant flow:
+      1. User Authenticates with the Provider and consents (Authorizes) the Client to access data on their behalf
+      2. Provider Redirects to Client with Auth Code
+      3. Client Front-end Sends Auth Code to Back-end
+      4. Client Back-end Exchanges (by using it’s client secret) Auth Code For access token
+    - Q/A: 7.2 walkthrough needs a re-write. Give theory first, then instruction.
+    - two types of tokens
+      - `access tokens` - used as proof of authorization for a client wanting to access resources
+      - `identity tokens` - used to share identity to authenticate
+    - JWT's  (java web tokens)
+      - `JWT` - way of securely transferring payload data that can be verified. 3 componenets
+        1. `header`: jwt's metadata
+        2. `payload`: JSON data
+        3. `signature`: digital signature (for authenticity)
+    - Brain melted into floor, after seeing identity/access tokens re-defined.. again?
+  
 
